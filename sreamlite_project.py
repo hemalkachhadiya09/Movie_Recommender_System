@@ -8,7 +8,13 @@ import scipy.stats
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
-
+movie_df=pd.read_csv("movies.csv")
+df=pd.read_csv("ratings.csv")
+movie_df['genres']=movie_df['genres'].str.replace("|"," ")
+movie_df['title']=movie_df['title'].str.replace('(\(\d\d\d\d\))','')
+movie_df['title']=movie_df['title'].apply(lambda x:x.strip())
+st.title("Find Movie :")
+st.write(movie_df)
 option = st.selectbox(
      'Select Type of Recommender System',
      ('Popularity-Based Recommender System', 'Content-Based Recommender System', 'Collaborative Based Recommender System'))
@@ -16,8 +22,8 @@ option = st.selectbox(
 
 
 st.title(option)
-movie_df=pd.read_csv("movies.csv")
-df=pd.read_csv("ratings.csv")
+
+
 
 type_movies=movie_df.groupby("genres")["movieId"].sum().sort_values(ascending=False)
 
@@ -48,9 +54,8 @@ if option=='Popularity-Based Recommender System':
      final=out[["Movie Title","Average Movie Rating","Num Reviews"]]
      st.write(final.head(int(re)))
 elif option=='Content-Based Recommender System':
-    movie_df['genres']=movie_df['genres'].str.replace("|"," ")
-    movie_df['title']=movie_df['title'].str.replace('(\(\d\d\d\d\))','')
-    movie_df['title']=movie_df['title'].apply(lambda x:x.strip())
+
+
 
     tf = TfidfVectorizer(analyzer='word', ngram_range=(1, 3), min_df=0, stop_words='english')
     matrix = tf.fit_transform(movie_df['genres'])
