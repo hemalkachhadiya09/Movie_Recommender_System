@@ -4,7 +4,9 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import linear_kernel
 
 option = st.selectbox(
      'Select Type of Recommender System',
@@ -51,7 +53,7 @@ elif option=='Content-Based Recommender System':
 
     tf = TfidfVectorizer(analyzer='word', ngram_range=(1, 3), min_df=0, stop_words='english')
     matrix = tf.fit_transform(movie_df['genres'])
-    from sklearn.metrics.pairwise import linear_kernel
+
     cosine_similarities = linear_kernel(matrix,matrix)
     movie_title = movie_df['title']
     indices = pd.Series(movie_df.index, index=movie_df['title'])
