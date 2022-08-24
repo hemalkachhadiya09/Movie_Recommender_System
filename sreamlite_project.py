@@ -15,6 +15,8 @@ movie_df['title']=movie_df['title'].str.replace('(\(\d\d\d\d\))','')
 movie_df['title']=movie_df['title'].apply(lambda x:x.strip())
 st.title("Find Movie :")
 st.write(movie_df)
+st.title("Find UserId :")
+st.write(df)
 option = st.selectbox(
      'Select Type of Recommender System',
      ('Popularity-Based Recommender System', 'Content-Based Recommender System', 'Collaborative Based Recommender System'))
