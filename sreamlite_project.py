@@ -4,6 +4,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import scipy.stats
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
@@ -65,4 +66,33 @@ elif option=='Content-Based Recommender System':
     final.reset_index(level=0, inplace=True)
     st.write(final)
 else:
-  st.write(print("nothing"))
+    user = st.text_input("UserID:", 1)
+    topN = st.text_input("Num recommendations(N):", 10)
+    threshold = st.text_input("Threshold for similar users (k):", 100)
+    data = pd.merge(movie_df, df, on="movieId", how="inner")
+    user_movies_df = data.pivot_table(index='userId', columns='title', values='rating')
+    matrix_norm = user_movies_df.subtract(user_movies_df.mean(axis=1), axis='rows')
+    user_similarity = matrix_norm.T.corr()
+    picked_userId =int(user)
+    user_similarity.drop(index=picked_userId, inplace=True)
+    n = int(threshold)
+    user_similarity_threshold = 0.8
+    similar_users = user_similarity[user_similarity[picked_userId] > user_similarity_threshold][picked_userId].sort_values(ascending=False)[:n]
+    picked_userId_watched = matrix_norm[matrix_norm.index == picked_userId].dropna(axis=1, how='all')
+    similar_user_movie = matrix_norm[matrix_norm.index.isin(similar_users.index)].dropna(axis=1, how='all')
+    similar_user_movie.drop(picked_userId_watched.columns, axis=1, inplace=True, errors='ignore')
+    item_score = {}
+
+    for i in similar_user_movie.columns:
+        movie_rating = similar_user_movie[i]
+        total = 0
+        count = 0
+        for u in similar_users.index:
+            if pd.isna(movie_rating[u]) == False:
+                score = similar_users[u] * movie_rating[u]
+                total += score
+                count += 1
+        item_score[i] = total / count
+    item_score = pd.DataFrame(item_score.keys(), columns=['Movie Title'])
+    final=item_score.head(int(topN))
+    st.write(final)
